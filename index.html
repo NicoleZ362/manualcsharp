@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modificadores de acceso y encapsulamiento en C#</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    color: #000;
+    background: #fff;
+    line-height: 2;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  h1, h2, h3 { color: #000; font-size: 12pt; font-weight: bold; }
+  h2 { text-align: center; }
+  h3 { text-align: left; }
+  p { text-indent: 1.27cm; margin: 0; }
+  a { color: #000; }
+  .portada { text-align: center; min-height: 90vh; }
+  .portada p { text-indent: 0; }
+  .portada img { width: 260px; margin-bottom: 60px; }
+  .portada h1 { margin: 60px 0; }
+  pre {
+    font-family: "Courier New", monospace;
+    font-size: 10pt;
+    line-height: 1.3;
+    color: #000;
+    margin: 12px 0 12px 1.27cm;
+    overflow-x: auto;
+  }
+  table { border-collapse: collapse; margin: 12px auto; }
+  th, td { border: 1px solid #000; padding: 2px 10px; font-size: 12pt; line-height: 1.5; }
+  .referencia { padding-left: 1.27cm; text-indent: -1.27cm; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <img src="data:image/png;base64,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" alt="Logo IUTEPI">
+  <h1>Modificadores de Acceso y Encapsulamiento de Clases en C# 5</h1>
+  <p>Nicole Zapata</p>
+  <p>Instituto Universitario de Tecnología para la Informática</p>
+  <p>Análisis de Sistemas</p>
+  <p>Electiva Profesional</p>
+  <p>Prof. Robyir Loreto</p>
+  <p>Octubre de 2026</p>
+</div>
+
+<h2>Introducción</h2>
+<p>En la programación orientada a objetos, una clase es un molde que sirve para crear objetos. Dentro de ella se definen los datos que va a guardar (atributos) y lo que puede hacer (métodos). Por ejemplo, una clase Estudiante puede tener un nombre y una nota, y un método que muestre esos datos en pantalla.</p>
+<p>Al crear una clase es importante decidir qué partes pueden ser usadas desde afuera y cuáles no. Para eso existen los modificadores de acceso, que se explican a continuación con un ejemplo de cada uno.</p>
+
+<pre>
+public class Estudiante
+{
+    public string nombre;
+    public int nota;
+
+    public void MostrarDatos()
+    {
+        Console.WriteLine("Nombre: " + nombre + " - Nota: " + nota);
+    }
+}
+</pre>
+
+<h2>Modificadores de Acceso</h2>
+<p>Los modificadores de acceso son palabras reservadas que indican desde dónde se puede usar una clase, un atributo o un método. Sirven para proteger la información y evitar que otras partes del programa la cambien por error. Los más utilizados son public, private y protected.</p>
+
+<h3>Public</h3>
+<p>Un miembro público se puede usar desde cualquier parte del programa, e incluso desde otros proyectos. Se usa para los métodos que la clase ofrece a los demás.</p>
+<pre>
+public class Calculadora
+{
+    public int Sumar(int a, int b)
+    {
+        return a + b;
+    }
+}
+
+// En el Main:
+Calculadora calc = new Calculadora();
+Console.WriteLine(calc.Sumar(5, 3)); // Muestra 8
+</pre>
+
+<h3>Private</h3>
+<p>Un miembro privado solo se puede usar dentro de la misma clase. Si no se escribe ningún modificador en un atributo o método, C# lo toma como privado. Se usa para guardar datos que no deben ser modificados desde afuera.</p>
+<pre>
+public class CuentaBancaria
+{
+    private double saldo = 0;
+
+    public void Depositar(double monto)
+    {
+        saldo = saldo + monto;
+    }
+
+    public double ConsultarSaldo()
+    {
+        return saldo;
+    }
+}
+
+// En el Main:
+CuentaBancaria cuenta = new CuentaBancaria();
+cuenta.Depositar(100);
+Console.WriteLine(cuenta.ConsultarSaldo()); // Muestra 100
+// cuenta.saldo = 5000;  Esto da error porque saldo es privado
+</pre>
+
+<h3>Protected</h3>
+<p>Un miembro protegido se puede usar dentro de la misma clase y en las clases que heredan de ella, pero no desde afuera. Se usa cuando una clase hija necesita trabajar con los datos de la clase padre.</p>
+<pre>
+public class Animal
+{
+    protected string nombre;
+
+    public Animal(string nombre)
+    {
+        this.nombre = nombre;
+    }
+}
+
+public class Perro : Animal
+{
+    public Perro(string nombre) : base(nombre) { }
+
+    public void Ladrar()
+    {
+        Console.WriteLine(nombre + " dice: Guau");
+    }
+}
+
+// En el Main:
+Perro perro = new Perro("Bobby");
+perro.Ladrar(); // Muestra: Bobby dice: Guau
+// perro.nombre = "Max";  Esto da error porque nombre es protegido
+</pre>
+
+<p>Además de estos tres, C# 5 tiene otros dos modificadores menos usados: internal, que permite el acceso desde cualquier parte del mismo proyecto, y protected internal, que combina internal y protected.</p>
+
+<p>La siguiente tabla resume desde dónde se puede acceder con cada uno de los tres modificadores principales:</p>
+<table>
+  <tr><th>Modificador</th><th>Misma clase</th><th>Clase hija</th><th>Fuera de la clase</th></tr>
+  <tr><td>public</td><td>Sí</td><td>Sí</td><td>Sí</td></tr>
+  <tr><td>private</td><td>Sí</td><td>No</td><td>No</td></tr>
+  <tr><td>protected</td><td>Sí</td><td>Sí</td><td>No</td></tr>
+</table>
+
+<h2>Encapsulamiento</h2>
+<p>El encapsulamiento consiste en ocultar los atributos de una clase, declarándolos como private, y permitir que se lean o se cambien solamente por medio de propiedades o métodos públicos. De esta forma la clase controla sus propios datos y puede evitar que se guarden valores incorrectos.</p>
+<p>En C# esto se hace con propiedades, que tienen un get para leer el valor y un set para cambiarlo. En el siguiente ejemplo la edad está oculta y solo se guarda si el valor es válido:</p>
+<pre>
+public class Persona
+{
+    private int edad;
+
+    public int Edad
+    {
+        get { return edad; }
+        set
+        {
+            if (value &gt;= 0 &amp;&amp; value &lt;= 120)
+                edad = value;
+            else
+                Console.WriteLine("Edad no válida");
+        }
+    }
+}
+
+// En el Main:
+Persona p = new Persona();
+p.Edad = 18;   // Se guarda
+p.Edad = -5;   // Muestra "Edad no válida" y no se guarda
+Console.WriteLine(p.Edad); // Muestra 18
+</pre>
+<p>Cuando no hace falta validar nada, C# 5 permite usar propiedades automáticas, por ejemplo: public string Nombre { get; set; }</p>
+
+<h2>Ejemplo Completo</h2>
+<p>En este ejemplo se usa una sola clase, Vehiculo, que tiene un atributo de cada tipo. La placa es privada y se maneja con encapsulamiento, la velocidad es protegida para que la clase hija Moto pueda usarla, y la marca y el método Acelerar son públicos.</p>
+<pre>
+using System;
+
+public class Vehiculo
+{
+    private string placa;      // Solo la clase Vehiculo la puede usar
+    protected int velocidad;   // Vehiculo y sus clases hijas
+    public string marca;       // Cualquier parte del programa
+
+    public string Placa        // Encapsulamiento de placa
+    {
+        get { return placa; }
+        set
+        {
+            if (value != "")
+                placa = value;
+        }
+    }
+
+    public void Acelerar(int cantidad)
+    {
+        velocidad = velocidad + cantidad;
+    }
+}
+
+public class Moto : Vehiculo
+{
+    public void MostrarVelocidad()
+    {
+        Console.WriteLine("Velocidad: " + velocidad + " km/h");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Moto moto = new Moto();
+        moto.marca = "Yamaha";     // Correcto: es public
+        moto.Placa = "AB123CD";    // Correcto: se usa la propiedad
+        moto.Acelerar(60);         // Correcto: es public
+        moto.MostrarVelocidad();   // Muestra: Velocidad: 60 km/h
+
+        // moto.placa = "XYZ";     Error: placa es private
+        // moto.velocidad = 100;   Error: velocidad es protected
+
+        Console.WriteLine(moto.marca + " - " + moto.Placa);
+    }
+}
+</pre>
+
+<h2>Conclusión</h2>
+<p>Los modificadores de acceso permiten decidir qué partes de una clase pueden ser vistas y usadas por el resto del programa. Usarlos bien, junto con el encapsulamiento, hace que el código sea más seguro, más ordenado y más fácil de mantener, ya que cada clase protege sus propios datos.</p>
+
+</body>
+</html>
