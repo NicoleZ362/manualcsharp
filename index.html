@@ -3,237 +3,602 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modificadores de acceso y encapsulamiento en C#</title>
+<title>Clases en C# paso a paso</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    font-size: 12pt;
-    color: #000;
-    background: #fff;
-    line-height: 2;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;
+  :root {
+    --acento: #9e1b32;
+    --acento-osc: #7a1426;
+    --t1: #fdf4f5;
+    --t2: #f7e3e7;
+    --t3: #efc9d0;
+    --t4: #e4a9b4;
+    --fondo: #f5f4f2;
+    --linea: #e2dfdb;
+    --editor: #1f2128;
+    --editor-bar: #2a2d36;
   }
-  h1, h2, h3 { color: #000; font-size: 12pt; font-weight: bold; }
-  h2 { text-align: center; }
-  h3 { text-align: left; }
-  p { text-indent: 1.27cm; margin: 0; }
-  a { color: #000; }
-  .portada { text-align: center; min-height: 90vh; }
-  .portada p { text-indent: 0; }
-  .portada img { width: 260px; margin-bottom: 60px; }
-  .portada h1 { margin: 60px 0; }
-  pre {
-    font-family: "Courier New", monospace;
-    font-size: 10pt;
-    line-height: 1.3;
-    color: #000;
-    margin: 12px 0 12px 1.27cm;
-    overflow-x: auto;
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+  body { margin: 0; font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.75; color: #000; background: var(--fondo); }
+  h1, h2, h3, p, li, td, th, summary, a { color: #000; }
+
+  /* Barra de progreso */
+  #progreso { position: fixed; top: 0; left: 0; height: 4px; width: 0; background: var(--acento); z-index: 50; transition: width .1s; }
+
+  /* Portada */
+  .portada { background: #fff; border-bottom: 1px solid var(--linea); position: relative; overflow: hidden; }
+  .portada::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 8px; background: var(--acento); }
+  .portada::after { content: "{ }"; position: absolute; right: -20px; bottom: -70px; font-family: Consolas, monospace; font-size: 260px; color: var(--t1); line-height: 1; pointer-events: none; }
+  .portada-in { max-width: 900px; margin: 0 auto; padding: 60px 24px 50px; text-align: center; position: relative; z-index: 1; }
+  .portada img { width: 280px; max-width: 75%; }
+  .institucion { margin: 18px 0 0; font-size: 11pt; letter-spacing: .5px; }
+  .portada h1 { font-size: 26pt; line-height: 1.25; margin: 36px auto 14px; max-width: 860px; }
+  .subtitulo { font-size: 13pt; margin: 0 auto; max-width: 620px; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 26px 0 34px; }
+  .chip { background: var(--t1); border: 1px solid var(--t3); border-radius: 999px; padding: 4px 14px; font-size: 10.5pt; }
+  .datos { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--linea); border-radius: 12px; background: #fff; text-align: left; overflow: hidden; }
+  .datos div { padding: 14px 18px; border-right: 1px solid var(--linea); }
+  .datos div:last-child { border-right: 0; }
+  .datos small { display: block; font-size: 9pt; text-transform: uppercase; letter-spacing: 1px; }
+  .datos strong { font-size: 11.5pt; }
+
+  /* Distribución */
+  .layout { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 36px; padding: 40px 24px 80px; }
+  aside { position: sticky; top: 24px; align-self: start; }
+  .indice { background: #fff; border: 1px solid var(--linea); border-radius: 14px; padding: 18px 14px; }
+  .indice p { font-size: 9.5pt; text-transform: uppercase; letter-spacing: 1.2px; font-weight: bold; margin: 0 8px 10px; }
+  .indice a { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 7px 10px; border-radius: 8px; font-size: 11pt; line-height: 1.3; }
+  .indice a span { flex: 0 0 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--t4); display: grid; place-items: center; font-size: 9.5pt; font-weight: bold; }
+  .indice a:hover { background: var(--t1); }
+  .indice a.activo { background: var(--t2); font-weight: bold; }
+  .indice a.activo span { background: var(--acento); border-color: var(--acento); color: #fff; }
+
+  main { min-width: 0; }
+  .tarjeta { background: #fff; border: 1px solid var(--linea); border-radius: 16px; padding: 36px 40px; margin-bottom: 28px; }
+  .encabezado { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .num { flex: 0 0 auto; font-size: 13pt; font-weight: bold; border: 2px solid var(--acento); border-radius: 10px; padding: 4px 12px; background: var(--t1); }
+  h2 { font-size: 18pt; line-height: 1.3; margin: 0; }
+  h3 { font-size: 13pt; margin: 28px 0 8px; }
+  .lead { font-size: 12.5pt; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 10.5pt; background: var(--t1); border: 1px solid var(--t2); border-radius: 5px; padding: 1px 5px; }
+
+  /* Editor de código */
+  .editor { background: var(--editor); border-radius: 12px; overflow: hidden; margin: 18px 0; box-shadow: 0 10px 24px -14px rgba(0,0,0,.45); }
+  .editor-bar { display: flex; align-items: center; gap: 12px; background: var(--editor-bar); padding: 9px 14px; }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; background: #5a5e6b; display: block; }
+  .dots i:first-child { background: #e0626a; }
+  .dots i:nth-child(2) { background: #e6b450; }
+  .dots i:nth-child(3) { background: #6cc287; }
+  .archivo { font-family: Consolas, monospace; font-size: 10pt; color: #d6d8de; flex: 1; }
+  .copiar { font-family: Arial, sans-serif; font-size: 9.5pt; color: #d6d8de; background: transparent; border: 1px solid #4a4e5a; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+  .copiar:hover { border-color: #d6d8de; }
+  .editor pre { margin: 0; padding: 18px 20px; overflow-x: auto; }
+  .editor code { background: none; border: 0; padding: 0; color: #e6e6e6; font-size: 10.5pt; line-height: 1.6; display: block; }
+  .k { color: #c49cde; } .s { color: #e5b383; } .c { color: #7f8696; font-style: italic; } .n { color: #b5cea8; } .t { color: #6fc3b2; }
+
+  /* Consola */
+  .consola { border-radius: 12px; overflow: hidden; margin: 14px 0 18px; border: 1px solid #c9e6d2; background: #f3faf5; }
+  .consola-bar { font-size: 9.5pt; font-weight: bold; letter-spacing: .8px; text-transform: uppercase; padding: 6px 14px; background: #e1f2e6; border-bottom: 1px solid #c9e6d2; }
+  .consola pre { margin: 0; padding: 12px 16px; font-family: Consolas, monospace; font-size: 10.5pt; color: #000; white-space: pre-wrap; }
+  .consola.error { border-color: var(--t3); background: var(--t1); }
+  .consola.error .consola-bar { background: var(--t2); border-color: var(--t3); }
+
+  /* Recuadros */
+  .nota { border-radius: 12px; padding: 16px 20px; margin: 18px 0; border: 1px solid; }
+  .nota b.titulo { display: block; font-size: 10pt; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .aprendiste { background: #f3faf5; border-color: #c9e6d2; border-left: 5px solid #2f8a4f; }
+  .problema { background: #fff8ec; border-color: #f0dcb4; border-left: 5px solid #c98a12; }
+  .idea { background: var(--t1); border-color: var(--t2); border-left: 5px solid var(--acento); }
+
+  ol.linea { padding-left: 0; list-style: none; counter-reset: l; }
+  ol.linea li { counter-increment: l; position: relative; padding: 10px 0 10px 44px; border-bottom: 1px solid var(--linea); }
+  ol.linea li:last-child { border-bottom: 0; }
+  ol.linea li::before { content: counter(l); position: absolute; left: 0; top: 10px; width: 28px; height: 28px; border-radius: 8px; background: var(--t2); display: grid; place-items: center; font-weight: bold; font-size: 10.5pt; }
+
+  .siguiente { display: flex; justify-content: flex-end; margin-top: 26px; }
+  .siguiente a { text-decoration: none; font-weight: bold; border: 1.5px solid var(--acento); border-radius: 999px; padding: 8px 20px; transition: background .2s; }
+  .siguiente a:hover { background: var(--t2); }
+
+  /* Mapa de alcance */
+  .mapa { border-radius: 16px; padding: 14px; background: #fff; border: 2px solid var(--t2); margin: 18px 0 8px; }
+  .mapa .capa { border-radius: 12px; padding: 12px 14px 14px; }
+  .mapa .capa > b { display: block; font-size: 10.5pt; margin-bottom: 8px; }
+  .mapa .capa > b code { margin-right: 6px; }
+  .c1 { background: var(--t1); } .c2 { background: var(--t2); } .c3 { background: var(--t3); } .c4 { background: var(--t4); text-align: center; padding: 18px !important; }
+  .mapa-nota { font-size: 10.5pt; text-align: center; margin: 4px 0 0; }
+
+  /* Tabla */
+  .tabla { overflow-x: auto; border: 1px solid var(--linea); border-radius: 12px; margin: 18px 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  th, td { padding: 12px 14px; text-align: center; border-bottom: 1px solid var(--linea); font-size: 11pt; }
+  th { background: var(--t1); font-size: 10pt; text-transform: uppercase; letter-spacing: .6px; }
+  td:first-child, th:first-child { text-align: left; }
+  tr:last-child td { border-bottom: 0; }
+  .si, .no { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-weight: bold; font-size: 11pt; }
+  .si { background: #dcf1e3; } .no { background: var(--t2); }
+
+  /* Práctica */
+  details { border: 1px solid var(--linea); border-radius: 12px; margin: 12px 0; background: #fff; transition: border-color .2s; }
+  details[open] { border-color: var(--t4); }
+  summary { list-style: none; cursor: pointer; padding: 16px 52px 16px 20px; position: relative; font-weight: bold; line-height: 1.5; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: var(--t2); display: grid; place-items: center; font-size: 14pt; }
+  details[open] summary::after { content: "−"; background: var(--acento); color: #fff; }
+  .resp { padding: 0 20px 16px; border-top: 1px dashed var(--t3); padding-top: 14px; margin: 0 20px; padding-left: 0; padding-right: 0; }
+  .resp .editor { margin: 10px 0 0; }
+
+  footer { text-align: center; padding: 26px; font-size: 10pt; border-top: 1px solid var(--linea); background: #fff; }
+
+  /* Celular */
+  @media (max-width: 920px) {
+    .layout { grid-template-columns: minmax(0, 1fr); padding: 0 16px 60px; gap: 0; }
+    aside { position: sticky; top: 0; z-index: 20; margin: 0 -16px 20px; }
+    .indice { border-radius: 0; border-width: 0 0 1px; padding: 10px 12px; display: flex; overflow-x: auto; gap: 4px; }
+    .indice p { display: none; }
+    .indice a { flex: 0 0 auto; font-size: 10pt; padding: 6px 10px; }
+    .indice a span { display: none; }
+    .tarjeta { padding: 24px 20px; }
+    .datos { grid-template-columns: 1fr 1fr; }
+    .datos div:nth-child(2) { border-right: 0; }
+    .datos div:nth-child(-n+2) { border-bottom: 1px solid var(--linea); }
+    .portada h1 { font-size: 20pt; }
+    h2 { font-size: 15pt; }
+    .encabezado { align-items: flex-start; flex-direction: column; gap: 8px; }
   }
-  table { border-collapse: collapse; margin: 12px auto; }
-  th, td { border: 1px solid #000; padding: 2px 10px; font-size: 12pt; line-height: 1.5; }
-  .referencia { padding-left: 1.27cm; text-indent: -1.27cm; }
 </style>
 </head>
 <body>
+<div id="progreso"></div>
 
-<div class="portada">
-  <img src="data:image/png;base64,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" alt="Logo IUTEPI">
-  <h1>Modificadores de Acceso y Encapsulamiento de Clases en C# 5</h1>
-  <p>Nicole Zapata</p>
-  <p>Instituto Universitario de Tecnología para la Informática</p>
-  <p>Análisis de Sistemas</p>
-  <p>Electiva Profesional</p>
-  <p>Prof. Robyir Loreto</p>
-  <p>Octubre de 2026</p>
-</div>
+<header class="portada">
+  <div class="portada-in">
+    <img src="data:image/png;base64,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" alt="Logo IUTEPI">
+    <p class="institucion">Instituto Universitario de Tecnología para la Informática</p>
+    <h1>Construyendo una Clase en C# Paso a Paso</h1>
+    <p class="subtitulo">Modificadores de acceso (public, private, protected) y encapsulamiento, explicados con un mismo ejemplo de principio a fin.</p>
+    <div class="chips">
+      <span class="chip">6 pasos</span>
+      <span class="chip">Ejemplos ejecutables</span>
+      <span class="chip">5 ejercicios</span>
+      <span class="chip">C# versión 5</span>
+    </div>
+    <div class="datos">
+      <div><small>Autora</small><strong>Nicole Zapata</strong></div>
+      <div><small>Carrera</small><strong>Análisis de Sistemas</strong></div>
+      <div><small>Materia</small><strong>Electiva Profesional</strong></div>
+      <div><small>Profesor</small><strong>Robyir Loreto</strong></div>
+    </div>
+  </div>
+</header>
 
-<h2>Introducción</h2>
-<p>En la programación orientada a objetos, una clase es un molde que sirve para crear objetos. Dentro de ella se definen los datos que va a guardar (atributos) y lo que puede hacer (métodos). Por ejemplo, una clase Estudiante puede tener un nombre y una nota, y un método que muestre esos datos en pantalla.</p>
-<p>Al crear una clase es importante decidir qué partes pueden ser usadas desde afuera y cuáles no. Para eso existen los modificadores de acceso, que se explican a continuación con un ejemplo de cada uno.</p>
+<div class="layout">
+<aside>
+  <nav class="indice">
+    <p>Contenido</p>
+    <a href="#inicio"><span>i</span>Introducción</a>
+    <a href="#paso1"><span>1</span>La clase</a>
+    <a href="#paso2"><span>2</span>public</a>
+    <a href="#paso3"><span>3</span>private</a>
+    <a href="#paso4"><span>4</span>Encapsulamiento</a>
+    <a href="#paso5"><span>5</span>protected</a>
+    <a href="#paso6"><span>6</span>internal</a>
+    <a href="#final"><span>★</span>Programa final</a>
+    <a href="#resumen"><span>Σ</span>Resumen</a>
+    <a href="#practica"><span>?</span>Práctica</a>
+  </nav>
+</aside>
 
-<pre>
+<main>
+
+<section class="tarjeta" id="inicio">
+  <div class="encabezado"><span class="num">Inicio</span><h2>¿Cómo funciona este tutorial?</h2></div>
+  <p class="lead">En lugar de ver cada modificador por separado, aquí vamos a <strong>construir una sola clase desde cero</strong>: la clase <code>Estudiante</code>, que guarda el nombre y la nota de un alumno. En cada paso le hacemos un cambio, vemos qué pasa al ejecutar el programa y entendemos por qué.</p>
+  <p>Cada paso incluye el código de ese momento, la <strong>salida en consola</strong> (o el error que daría), la explicación línea por línea de lo importante y un resumen de lo que aprendiste.</p>
+
+  <div class="nota idea"><b class="titulo">Antes de empezar: ¿qué es una clase?</b>
+  Una clase es un molde para crear objetos. La clase <code>Estudiante</code> describe qué datos tiene un estudiante (nombre, nota) y qué puede hacer. Con ese molde podemos crear muchos estudiantes, como Ana, Luis o María, y cada uno es un <strong>objeto</strong>.</div>
+
+  <h3>El mapa: ¿quién puede entrar?</h3>
+  <p>Los modificadores de acceso funcionan como círculos, uno dentro de otro. Mientras más adentro, menos partes del programa pueden ver el dato:</p>
+  <div class="mapa">
+    <div class="capa c1"><b><code>public</code> Todo el programa, incluso otros proyectos</b>
+      <div class="capa c2"><b><code>internal</code> Todas las clases del mismo proyecto</b>
+        <div class="capa c3"><b><code>protected</code> La clase y sus clases hijas</b>
+          <div class="capa c4"><b><code>private</code> Solo la propia clase</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mapa-nota">Vamos a recorrer este mapa paso a paso.</p>
+  <div class="siguiente"><a href="#paso1">Empezar: Paso 1 →</a></div>
+</section>
+
+<section class="tarjeta" id="paso1">
+  <div class="encabezado"><span class="num">Paso 1</span><h2>Creamos la clase sin ninguna protección</h2></div>
+  <p>Empezamos con lo más simple: una clase con dos datos y todo abierto.</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso1.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">using System;
+
 public class Estudiante
 {
     public string nombre;
-    public int nota;
-
-    public void MostrarDatos()
-    {
-        Console.WriteLine("Nombre: " + nombre + " - Nota: " + nota);
-    }
-}
-</pre>
-
-<h2>Modificadores de Acceso</h2>
-<p>Los modificadores de acceso son palabras reservadas que indican desde dónde se puede usar una clase, un atributo o un método. Sirven para proteger la información y evitar que otras partes del programa la cambien por error. Los más utilizados son public, private y protected.</p>
-
-<h3>Public</h3>
-<p>Un miembro público se puede usar desde cualquier parte del programa, e incluso desde otros proyectos. Se usa para los métodos que la clase ofrece a los demás.</p>
-<pre>
-public class Calculadora
-{
-    public int Sumar(int a, int b)
-    {
-        return a + b;
-    }
+    public double nota;
 }
 
-// En el Main:
-Calculadora calc = new Calculadora();
-Console.WriteLine(calc.Sumar(5, 3)); // Muestra 8
-</pre>
-
-<h3>Private</h3>
-<p>Un miembro privado solo se puede usar dentro de la misma clase. Si no se escribe ningún modificador en un atributo o método, C# lo toma como privado. Se usa para guardar datos que no deben ser modificados desde afuera.</p>
-<pre>
-public class CuentaBancaria
-{
-    private double saldo = 0;
-
-    public void Depositar(double monto)
-    {
-        saldo = saldo + monto;
-    }
-
-    public double ConsultarSaldo()
-    {
-        return saldo;
-    }
-}
-
-// En el Main:
-CuentaBancaria cuenta = new CuentaBancaria();
-cuenta.Depositar(100);
-Console.WriteLine(cuenta.ConsultarSaldo()); // Muestra 100
-// cuenta.saldo = 5000;  Esto da error porque saldo es privado
-</pre>
-
-<h3>Protected</h3>
-<p>Un miembro protegido se puede usar dentro de la misma clase y en las clases que heredan de ella, pero no desde afuera. Se usa cuando una clase hija necesita trabajar con los datos de la clase padre.</p>
-<pre>
-public class Animal
-{
-    protected string nombre;
-
-    public Animal(string nombre)
-    {
-        this.nombre = nombre;
-    }
-}
-
-public class Perro : Animal
-{
-    public Perro(string nombre) : base(nombre) { }
-
-    public void Ladrar()
-    {
-        Console.WriteLine(nombre + " dice: Guau");
-    }
-}
-
-// En el Main:
-Perro perro = new Perro("Bobby");
-perro.Ladrar(); // Muestra: Bobby dice: Guau
-// perro.nombre = "Max";  Esto da error porque nombre es protegido
-</pre>
-
-<p>Además de estos tres, C# 5 tiene otros dos modificadores menos usados: internal, que permite el acceso desde cualquier parte del mismo proyecto, y protected internal, que combina internal y protected.</p>
-
-<p>La siguiente tabla resume desde dónde se puede acceder con cada uno de los tres modificadores principales:</p>
-<table>
-  <tr><th>Modificador</th><th>Misma clase</th><th>Clase hija</th><th>Fuera de la clase</th></tr>
-  <tr><td>public</td><td>Sí</td><td>Sí</td><td>Sí</td></tr>
-  <tr><td>private</td><td>Sí</td><td>No</td><td>No</td></tr>
-  <tr><td>protected</td><td>Sí</td><td>Sí</td><td>No</td></tr>
-</table>
-
-<h2>Encapsulamiento</h2>
-<p>El encapsulamiento consiste en ocultar los atributos de una clase, declarándolos como private, y permitir que se lean o se cambien solamente por medio de propiedades o métodos públicos. De esta forma la clase controla sus propios datos y puede evitar que se guarden valores incorrectos.</p>
-<p>En C# esto se hace con propiedades, que tienen un get para leer el valor y un set para cambiarlo. En el siguiente ejemplo la edad está oculta y solo se guarda si el valor es válido:</p>
-<pre>
-public class Persona
-{
-    private int edad;
-
-    public int Edad
-    {
-        get { return edad; }
-        set
-        {
-            if (value &gt;= 0 &amp;&amp; value &lt;= 120)
-                edad = value;
-            else
-                Console.WriteLine("Edad no válida");
-        }
-    }
-}
-
-// En el Main:
-Persona p = new Persona();
-p.Edad = 18;   // Se guarda
-p.Edad = -5;   // Muestra "Edad no válida" y no se guarda
-Console.WriteLine(p.Edad); // Muestra 18
-</pre>
-<p>Cuando no hace falta validar nada, C# 5 permite usar propiedades automáticas, por ejemplo: public string Nombre { get; set; }</p>
-
-<h2>Ejemplo Completo</h2>
-<p>En este ejemplo se usa una sola clase, Vehiculo, que tiene un atributo de cada tipo. La placa es privada y se maneja con encapsulamiento, la velocidad es protegida para que la clase hija Moto pueda usarla, y la marca y el método Acelerar son públicos.</p>
-<pre>
-using System;
-
-public class Vehiculo
-{
-    private string placa;      // Solo la clase Vehiculo la puede usar
-    protected int velocidad;   // Vehiculo y sus clases hijas
-    public string marca;       // Cualquier parte del programa
-
-    public string Placa        // Encapsulamiento de placa
-    {
-        get { return placa; }
-        set
-        {
-            if (value != "")
-                placa = value;
-        }
-    }
-
-    public void Acelerar(int cantidad)
-    {
-        velocidad = velocidad + cantidad;
-    }
-}
-
-public class Moto : Vehiculo
-{
-    public void MostrarVelocidad()
-    {
-        Console.WriteLine("Velocidad: " + velocidad + " km/h");
-    }
-}
-
-class Program
+class Programa
 {
     static void Main()
     {
-        Moto moto = new Moto();
-        moto.marca = "Yamaha";     // Correcto: es public
-        moto.Placa = "AB123CD";    // Correcto: se usa la propiedad
-        moto.Acelerar(60);         // Correcto: es public
-        moto.MostrarVelocidad();   // Muestra: Velocidad: 60 km/h
+        Estudiante ana = new Estudiante();
+        ana.nombre = "Ana";
+        ana.nota = -50;   // ¿Una nota negativa?
+        Console.WriteLine(ana.nombre + " sacó " + ana.nota + " puntos");
+    }
+}</code></pre></div>
+  <div class="consola"><div class="consola-bar">&gt;_ Salida en consola</div><pre>Ana sacó -50 puntos</pre></div>
 
-        // moto.placa = "XYZ";     Error: placa es private
-        // moto.velocidad = 100;   Error: velocidad es protected
+  <h3>Línea por línea</h3>
+  <ol class="linea">
+    <li><code>public class Estudiante</code> crea el molde llamado Estudiante.</li>
+    <li><code>public string nombre;</code> y <code>public double nota;</code> son los datos (atributos) que tendrá cada estudiante.</li>
+    <li><code>new Estudiante()</code> crea un objeto: un estudiante real hecho con el molde.</li>
+    <li><code>ana.nota = -50;</code> le asigna una nota… y el programa la acepta sin quejarse.</li>
+  </ol>
+  <div class="nota problema"><b class="titulo">El problema</b>
+  En nuestro sistema las notas van del 0 al 20, pero el programa aceptó un <strong>-50</strong>. Como <code>nota</code> está abierta a todo el mundo, cualquier parte del código puede ponerle cualquier valor. En los siguientes pasos lo vamos a arreglar.</div>
+  <div class="siguiente"><a href="#paso2">Siguiente: public →</a></div>
+</section>
 
-        Console.WriteLine(moto.marca + " - " + moto.Placa);
+<section class="tarjeta" id="paso2">
+  <div class="encabezado"><span class="num">Paso 2</span><h2>Entendiendo <code>public</code></h2></div>
+  <p>En el paso 1 todo era <code>public</code>. Esta palabra significa: <strong>"cualquier parte del programa puede ver y usar esto"</strong>, incluso desde otros proyectos.</p>
+  <p><strong>¿Para qué sirve?</strong> Para lo que la clase quiere <strong>ofrecer</strong> a los demás, como sus acciones principales. Por ejemplo, un método para saludar sí debe ser público, porque queremos que se use:</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso2.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">public class Estudiante
+{
+    public string nombre;
+
+    public void Saludar()
+    {
+        Console.WriteLine("Hola, soy " + nombre);
     }
 }
-</pre>
 
-<h2>Conclusión</h2>
-<p>Los modificadores de acceso permiten decidir qué partes de una clase pueden ser vistas y usadas por el resto del programa. Usarlos bien, junto con el encapsulamiento, hace que el código sea más seguro, más ordenado y más fácil de mantener, ya que cada clase protege sus propios datos.</p>
+// En el Main:
+Estudiante luis = new Estudiante();
+luis.nombre = "Luis";   // Permitido: nombre es public
+luis.Saludar();         // Permitido: Saludar es public</code></pre></div>
+  <div class="consola"><div class="consola-bar">&gt;_ Salida en consola</div><pre>Hola, soy Luis</pre></div>
+  <div class="nota aprendiste"><b class="titulo">Lo que aprendiste</b>
+  <code>public</code> es como la puerta principal de una tienda: todo el mundo puede entrar. Está bien para los métodos que la clase ofrece, pero <strong>no</strong> para datos delicados como la nota, porque cualquiera la puede dañar.</div>
+  <div class="siguiente"><a href="#paso3">Siguiente: private →</a></div>
+</section>
 
+<section class="tarjeta" id="paso3">
+  <div class="encabezado"><span class="num">Paso 3</span><h2>Protegemos la nota con <code>private</code></h2></div>
+  <p>Cambiamos una sola palabra: <code>nota</code> pasa de <code>public</code> a <code>private</code>.</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso3.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">public class Estudiante
+{
+    public string nombre;
+    private double nota;   // Ahora es privada
+}
+
+// En el Main:
+Estudiante ana = new Estudiante();
+ana.nombre = "Ana";
+ana.nota = -50;   // Intentamos lo mismo que antes</code></pre></div>
+  <div class="consola error"><div class="consola-bar">✕ Error al compilar</div><pre>error CS0122: 'Estudiante.nota' no es accesible debido a su nivel de protección</pre></div>
+  <h3>¿Qué pasó?</h3>
+  <p><code>private</code> significa: <strong>"solo la propia clase puede usar esto"</strong>. Como el <code>Main</code> está fuera de la clase <code>Estudiante</code>, el compilador no le deja tocar la nota. Ya nadie puede poner un -50 desde afuera.</p>
+  <p>Dato importante: si no le escribes ningún modificador a un atributo o método, C# lo toma como <code>private</code> automáticamente.</p>
+  <div class="nota problema"><b class="titulo">Pero ahora hay un nuevo problema</b>
+  La nota quedó tan protegida que <strong>nadie</strong> puede leerla ni asignarle una nota válida, como un 18. Necesitamos una forma controlada de entrar. Eso es el encapsulamiento.</div>
+  <div class="siguiente"><a href="#paso4">Siguiente: encapsulamiento →</a></div>
+</section>
+
+<section class="tarjeta" id="paso4">
+  <div class="encabezado"><span class="num">Paso 4</span><h2>Encapsulamiento: una puerta con vigilante</h2></div>
+  <p>El <strong>encapsulamiento</strong> consiste en dejar el dato <code>private</code> y crear una <strong>propiedad pública</strong> que decida qué valores se aceptan. La propiedad tiene dos partes:</p>
+  <ul>
+    <li><code>get</code>: se ejecuta cuando alguien quiere <strong>leer</strong> el valor.</li>
+    <li><code>set</code>: se ejecuta cuando alguien quiere <strong>cambiar</strong> el valor. Lo que intentan guardar llega en la palabra <code>value</code>.</li>
+  </ul>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso4.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">using System;
+
+public class Estudiante
+{
+    public string nombre;
+    private double nota;          // El dato sigue escondido
+
+    public double Nota            // La "puerta" pública
+    {
+        get { return nota; }
+        set
+        {
+            if (value &gt;= 0 &amp;&amp; value &lt;= 20)
+                nota = value;
+            else
+                Console.WriteLine("Error: la nota debe estar entre 0 y 20.");
+        }
+    }
+}
+
+class Programa
+{
+    static void Main()
+    {
+        Estudiante ana = new Estudiante();
+        ana.nombre = "Ana";
+        ana.Nota = -50;   // El vigilante lo rechaza
+        ana.Nota = 18;    // Este sí pasa
+        Console.WriteLine(ana.nombre + " sacó " + ana.Nota + " puntos");
+    }
+}</code></pre></div>
+  <div class="consola"><div class="consola-bar">&gt;_ Salida en consola</div><pre>Error: la nota debe estar entre 0 y 20.
+Ana sacó 18 puntos</pre></div>
+  <h3>Línea por línea</h3>
+  <ol class="linea">
+    <li><code>private double nota;</code> el dato real sigue protegido.</li>
+    <li><code>public double Nota</code> es la propiedad; se escribe con mayúscula para diferenciarla del atributo.</li>
+    <li><code>ana.Nota = -50;</code> entra al <code>set</code>; el <code>if</code> ve que -50 no está entre 0 y 20 y muestra el error. La nota no cambia.</li>
+    <li><code>ana.Nota = 18;</code> el <code>if</code> lo acepta y guarda 18 en <code>nota</code>.</li>
+    <li><code>ana.Nota</code> dentro del <code>WriteLine</code> entra al <code>get</code> y devuelve 18.</li>
+  </ol>
+  <div class="nota aprendiste"><b class="titulo">Lo que aprendiste</b>
+  Encapsular es esconder los datos con <code>private</code> y dejar que se usen solo a través de propiedades o métodos públicos que los controlan. Así la clase se protege sola de valores incorrectos. ¡Ya resolvimos el problema del paso 1!</div>
+  <div class="nota idea"><b class="titulo">Atajo: propiedades automáticas</b>
+  Si un dato no necesita validación, C# 5 permite escribir la propiedad en una sola línea: <code>public string Nombre { get; set; }</code>. C# crea el atributo privado por dentro.</div>
+  <div class="siguiente"><a href="#paso5">Siguiente: protected →</a></div>
+</section>
+
+<section class="tarjeta" id="paso5">
+  <div class="encabezado"><span class="num">Paso 5</span><h2>Una clase hija y <code>protected</code></h2></div>
+  <p>Ahora queremos una clase <code>EstudianteBecado</code> que <strong>herede</strong> de <code>Estudiante</code>: que tenga todo lo de un estudiante y además sepa si mantiene la beca, que se pierde con menos de 16 puntos.</p>
+  <p>Para eso la clase hija necesita leer la nota. Veamos qué pasa si la nota sigue siendo <code>private</code>:</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso5_intento.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">public class EstudianteBecado : Estudiante   // ":" significa "hereda de"
+{
+    public string EstadoBeca()
+    {
+        if (nota &gt;= 16)   // nota sigue siendo private en Estudiante
+            return "Mantiene la beca";
+        else
+            return "Pierde la beca";
+    }
+}</code></pre></div>
+  <div class="consola error"><div class="consola-bar">✕ Error al compilar</div><pre>error CS0122: 'Estudiante.nota' no es accesible debido a su nivel de protección</pre></div>
+  <p>Aunque sea su hija, <code>private</code> no la deja pasar. La solución es <code>protected</code>, que significa: <strong>"solo la propia clase y sus clases hijas"</strong>.</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso5.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">public class Estudiante
+{
+    public string nombre;
+    protected double nota;   // Cambiamos private por protected
+    // ... la propiedad Nota queda igual ...
+}
+
+public class EstudianteBecado : Estudiante
+{
+    public string EstadoBeca()
+    {
+        if (nota &gt;= 16)      // Ahora sí: es su clase hija
+            return "Mantiene la beca";
+        else
+            return "Pierde la beca";
+    }
+}
+
+// En el Main:
+EstudianteBecado luis = new EstudianteBecado();
+luis.Nota = 15;
+Console.WriteLine(luis.EstadoBeca());
+// luis.nota = 20;   ERROR: desde el Main sigue sin poder tocarse</code></pre></div>
+  <div class="consola"><div class="consola-bar">&gt;_ Salida en consola</div><pre>Pierde la beca</pre></div>
+  <div class="nota aprendiste"><b class="titulo">Lo que aprendiste</b>
+  <code>protected</code> es como un secreto de familia: lo saben los padres y los hijos, pero nadie de afuera. Se usa cuando una clase hija necesita trabajar con datos de la clase padre sin dejarlos abiertos a todo el programa.</div>
+  <div class="siguiente"><a href="#paso6">Siguiente: internal →</a></div>
+</section>
+
+<section class="tarjeta" id="paso6">
+  <div class="encabezado"><span class="num">Paso 6</span><h2>Un extra: <code>internal</code></h2></div>
+  <p>Hay un modificador más que conviene conocer. <code>internal</code> significa: <strong>"cualquier clase de este mismo proyecto puede usarlo, pero otros proyectos no"</strong>. Si una clase no tiene modificador, C# la toma como <code>internal</code>.</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Paso6.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">internal class RegistroDeNotas
+{
+    internal void Guardar(Estudiante e)
+    {
+        Console.WriteLine("Guardando la nota de " + e.nombre);
+    }
+}
+// Cualquier clase de nuestro proyecto puede usar RegistroDeNotas.
+// Si otro proyecto la intenta usar, dará error.</code></pre></div>
+  <p>También existe <code>protected internal</code>, que suma las dos cosas: se puede usar en todo el proyecto <strong>y</strong> en clases hijas de otros proyectos.</p>
+  <div class="siguiente"><a href="#final">Siguiente: programa final →</a></div>
+</section>
+
+<section class="tarjeta" id="final">
+  <div class="encabezado"><span class="num">Final</span><h2>El programa completo</h2></div>
+  <p>Así queda la clase después de todos los pasos. Cada dato tiene el modificador que le corresponde según quién debe usarlo:</p>
+  <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">Programa.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">using System;
+
+public class Estudiante
+{
+    public string Nombre { get; set; }   // public: todos pueden verlo
+    protected double nota;               // protected: la clase y sus hijas
+    private string cedula;               // private: solo esta clase
+
+    public Estudiante(string nombre, string cedula)
+    {
+        Nombre = nombre;
+        this.cedula = cedula;
+    }
+
+    public double Nota                   // Encapsulamiento de nota
+    {
+        get { return nota; }
+        set
+        {
+            if (value &gt;= 0 &amp;&amp; value &lt;= 20)
+                nota = value;
+            else
+                Console.WriteLine("Error: la nota debe estar entre 0 y 20.");
+        }
+    }
+
+    public string CedulaOculta()         // Muestra la cédula sin revelarla completa
+    {
+        return "V-*****" + cedula.Substring(cedula.Length - 3);
+    }
+}
+
+public class EstudianteBecado : Estudiante
+{
+    public EstudianteBecado(string nombre, string cedula) : base(nombre, cedula) { }
+
+    public string EstadoBeca()
+    {
+        if (nota &gt;= 16)
+            return "Mantiene la beca";
+        else
+            return "Pierde la beca";
+    }
+}
+
+class Programa
+{
+    static void Main()
+    {
+        EstudianteBecado ana = new EstudianteBecado("Ana", "28123456");
+        ana.Nota = 25;
+        ana.Nota = 18;
+
+        Console.WriteLine("Estudiante: " + ana.Nombre);
+        Console.WriteLine("Cédula: " + ana.CedulaOculta());
+        Console.WriteLine("Nota: " + ana.Nota);
+        Console.WriteLine(ana.EstadoBeca());
+
+        // ana.cedula = "123";   ERROR: es private
+        // ana.nota = 20;        ERROR: es protected
+    }
+}</code></pre></div>
+  <div class="consola"><div class="consola-bar">&gt;_ Salida en consola</div><pre>Error: la nota debe estar entre 0 y 20.
+Estudiante: Ana
+Cédula: V-*****456
+Nota: 18
+Mantiene la beca</pre></div>
+</section>
+
+<section class="tarjeta" id="resumen">
+  <div class="encabezado"><span class="num">Resumen</span><h2>¿Quién puede usar cada cosa?</h2></div>
+  <div class="tabla">
+  <table>
+    <tr><th>Modificador</th><th>Misma clase</th><th>Clase hija</th><th>Mismo proyecto</th><th>Otro proyecto</th></tr>
+    <tr><td><code>public</code></td><td><span class="si">✓</span></td><td><span class="si">✓</span></td><td><span class="si">✓</span></td><td><span class="si">✓</span></td></tr>
+    <tr><td><code>internal</code></td><td><span class="si">✓</span></td><td><span class="si">✓</span></td><td><span class="si">✓</span></td><td><span class="no">✕</span></td></tr>
+    <tr><td><code>protected</code></td><td><span class="si">✓</span></td><td><span class="si">✓</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td></tr>
+    <tr><td><code>private</code></td><td><span class="si">✓</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td><td><span class="no">✕</span></td></tr>
+  </table>
+  </div>
+  <div class="tabla">
+  <table>
+    <tr><th>Modificador</th><th>¿Cuándo usarlo?</th><th>En nuestra clase</th></tr>
+    <tr><td><code>public</code></td><td>Lo que la clase ofrece a los demás</td><td><code>Nombre</code>, <code>Nota</code>, <code>EstadoBeca()</code></td></tr>
+    <tr><td><code>private</code></td><td>Datos delicados que nadie debe tocar</td><td><code>cedula</code></td></tr>
+    <tr><td><code>protected</code></td><td>Datos que las clases hijas necesitan</td><td><code>nota</code></td></tr>
+    <tr><td><code>internal</code></td><td>Clases de uso interno del proyecto</td><td><code>RegistroDeNotas</code></td></tr>
+  </table>
+  </div>
+  <div class="nota idea"><b class="titulo">Regla práctica</b>
+  Empieza poniendo todo <code>private</code> y abre solo lo necesario. Si una clase hija lo necesita, usa <code>protected</code>. Si todo el mundo lo necesita, usa una propiedad o un método <code>public</code>.</div>
+</section>
+
+<section class="tarjeta" id="practica">
+  <div class="encabezado"><span class="num">Práctica</span><h2>Pon a prueba lo que aprendiste</h2></div>
+  <p>Piensa la respuesta primero y después toca cada pregunta para ver si acertaste.</p>
+  <details><summary>1. ¿Qué pasa si escribes <code>ana.cedula = "123";</code> en el Main?</summary>
+    <div class="resp">Da error al compilar (CS0122), porque <code>cedula</code> es <code>private</code> y solo se puede usar dentro de la clase <code>Estudiante</code>.</div></details>
+  <details><summary>2. ¿Por qué <code>EstudianteBecado</code> puede leer <code>nota</code> y el Main no?</summary>
+    <div class="resp">Porque <code>nota</code> es <code>protected</code>: la pueden usar la clase <code>Estudiante</code> y sus clases hijas. <code>EstudianteBecado</code> es hija; el Main no.</div></details>
+  <details><summary>3. Si ejecutas <code>ana.Nota = 21;</code>, ¿qué se muestra y cuánto vale la nota después?</summary>
+    <div class="resp">Se muestra "Error: la nota debe estar entre 0 y 20." y la nota se queda con el valor que tenía antes, porque el <code>set</code> no la guardó.</div></details>
+  <details><summary>4. Tienes una clase <code>CuentaBancaria</code> con un atributo <code>saldo</code>. ¿Qué modificador le pondrías y cómo dejarías depositar dinero?</summary>
+    <div class="resp"><code>saldo</code> debe ser <code>private</code>, y se agrega un método público que valide el monto:
+      <div class="editor"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span><span class="archivo">CuentaBancaria.cs</span><button class="copiar">Copiar</button></div>
+<pre><code class="cs">private double saldo;
+
+public void Depositar(double monto)
+{
+    if (monto &gt; 0)
+        saldo = saldo + monto;
+}</code></pre></div></div></details>
+  <details><summary>5. ¿Qué modificador tiene un atributo si no le escribes ninguno?</summary>
+    <div class="resp"><code>private</code>. En cambio, una clase sin modificador es <code>internal</code>.</div></details>
+</section>
+
+<section class="tarjeta" id="conclusion">
+  <div class="encabezado"><span class="num">Cierre</span><h2>Conclusión</h2></div>
+  <p>Construyendo la clase <code>Estudiante</code> paso a paso vimos que los modificadores de acceso no son solo palabras: cada uno resuelve un problema. <code>public</code> abre lo que la clase ofrece, <code>private</code> protege los datos, <code>protected</code> los comparte con las clases hijas e <code>internal</code> los limita al proyecto. El encapsulamiento une todo esto: esconde los datos y controla cómo se usan, para que el programa no acepte valores incorrectos como una nota de -50.</p>
+</section>
+
+</main>
+</div>
+
+<footer>Nicole Zapata · Análisis de Sistemas · IUTEPI · Electiva Profesional · 2026</footer>
+
+<script>
+  // Resaltado de sintaxis sencillo para C#
+  (function () {
+    var re = /(\/\/.*$)|("(?:[^"\\]|\\.)*")|\b(public|private|protected|internal|class|static|void|using|new|return|if|else|get|set|value|this|base|string|double|int)\b|\b(\d+)\b|\b([A-Z][A-Za-z]*)\b/gm;
+    function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    document.querySelectorAll("code.cs").forEach(function (el) {
+      var src = el.textContent, out = "", last = 0, m;
+      while ((m = re.exec(src)) !== null) {
+        out += esc(src.slice(last, m.index));
+        var cls = m[1] ? "c" : m[2] ? "s" : m[3] ? "k" : m[4] ? "n" : "t";
+        out += '<span class="' + cls + '">' + esc(m[0]) + "</span>";
+        last = re.lastIndex;
+      }
+      el.innerHTML = out + esc(src.slice(last));
+    });
+  })();
+
+  // Botón copiar
+  document.querySelectorAll(".copiar").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var txt = b.closest(".editor").querySelector("code").textContent;
+      try {
+        navigator.clipboard.writeText(txt).then(function () {
+          b.textContent = "Copiado ✓";
+          setTimeout(function () { b.textContent = "Copiar"; }, 1500);
+        });
+      } catch (e) {}
+    });
+  });
+
+  // Barra de progreso
+  var barra = document.getElementById("progreso");
+  window.addEventListener("scroll", function () {
+    var h = document.documentElement;
+    barra.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%";
+  });
+
+  // Marcar la sección activa en el índice
+  var enlaces = document.querySelectorAll(".indice a");
+  var obs = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (e) {
+      if (e.isIntersecting) {
+        enlaces.forEach(function (a) {
+          var activo = a.getAttribute("href") === "#" + e.target.id;
+          a.classList.toggle("activo", activo);
+          if (activo && window.innerWidth <= 920) a.scrollIntoView({ block: "nearest", inline: "center" });
+        });
+      }
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  document.querySelectorAll("main section").forEach(function (s) { obs.observe(s); });
+</script>
 </body>
 </html>
